@@ -7,7 +7,7 @@ load_dotenv()
 
 # Configuration
 ZENDROP_API_KEY = os.getenv("SUPPLIER_API_KEY") or os.getenv("ZENDROP_API_KEY")
-ZENDROP_API_URL = os.getenv("SUPPLIER_API_URL") or "https://api.zendrop.com/v1"
+ZENDROP_API_URL = "https://app.zendrop.com/mcp/v1"
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME")
@@ -21,13 +21,53 @@ def fetch_zendrop_products():
     Attempts to fetch products from Zendrop.
     Falls back to mock data if the API is restricted or fails.
     """
-    print("[*] Fetching products from Supplier API...")
-    headers = {"Authorization": f"Bearer {ZENDROP_API_KEY}"}
+    print("[*] Fetching products from Supplier API (MCP Endpoint)...")
+    headers = {
+        "Authorization": f"Bearer {ZENDROP_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "get_catalog_products",
+            "arguments": {
+                "keyword": "pet",
+                "limit": 10
+            }
+        }
+    }
     
     try:
-        response = requests.get(f"{ZENDROP_API_URL}/products", headers=headers, timeout=10)
+        response = requests.post(f"{ZENDROP_API_URL}", headers=headers, json=payload, timeout=10)
         response.raise_for_status()
-        return response.json().get("data", [])
+        
+        raw_json = response.json()
+        print(f"DEBUG: Parsed response successfully")
+        
+        # In MCP, result might be under 'result' -> 'structuredContent' -> 'products'
+        data = raw_json.get("result", {}).get("structuredContent", {}).get("products", [])
+        
+        # Map MCP structure to our expected schema
+        mapped_products = []
+        for p in data:
+            images = [img.get("url") for img in p.get("images", []) if isinstance(img, dict) and "url" in img]
+            
+            mapped_products.append({
+                "product_id": p.get("id"),
+                "title": p.get("name"),
+                "description_html": p.get("description", f"<p>{p.get('name')}</p>"),
+                "supplier_cost": float(p.get("price", 0.0)),
+                "recommended_price": float(p.get("price", 0.0)) * 2.5,
+                "images": images,
+                "shipping_time_days": 7, # Default as it's not in the basic response
+                "rating": p.get("rating", 4.8) # Default if missing
+            })
+            
+        return mapped_products
+        
     except Exception as e:
         print(f"[-] Real API call failed or restricted: {e}")
         if 'response' in locals() and hasattr(response, 'text'):
