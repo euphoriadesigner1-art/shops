@@ -30,49 +30,9 @@ def fetch_zendrop_products():
         return response.json().get("data", [])
     except Exception as e:
         print(f"[-] Real API call failed or restricted: {e}")
-        print("[*] Falling back to Mock Pet Tech Data for pipeline testing...")
-        return [
-            {
-                "product_id": "MOCK-001",
-                "title": "Smart GPS Pet Tracker Collar",
-                "description_html": "<p>Real-time GPS tracking for your furry friend. Waterproof and durable.</p>",
-                "supplier_cost": 22.50,
-                "recommended_price": 59.99,
-                "images": ["https://via.placeholder.com/600x600.png?text=Smart+GPS+Collar"],
-                "shipping_time_days": 7,
-                "rating": 4.8
-            },
-            {
-                "product_id": "MOCK-002",
-                "title": "Automatic Smart Feeder with Camera",
-                "description_html": "<p>Schedule meals and talk to your pet via the 1080p HD camera.</p>",
-                "supplier_cost": 45.00,
-                "recommended_price": 129.99,
-                "images": ["https://via.placeholder.com/600x600.png?text=Smart+Feeder"],
-                "shipping_time_days": 12, # Should be filtered out!
-                "rating": 4.6
-            },
-            {
-                "product_id": "MOCK-003",
-                "title": "Orthopedic Memory Foam Pet Bed",
-                "description_html": "<p>Premium comfort for older pets with joint issues.</p>",
-                "supplier_cost": 18.00,
-                "recommended_price": 49.99,
-                "images": ["https://via.placeholder.com/600x600.png?text=Orthopedic+Bed"],
-                "shipping_time_days": 5,
-                "rating": 4.9
-            },
-            {
-                "product_id": "MOCK-004",
-                "title": "Basic Plastic Water Bowl",
-                "description_html": "<p>A simple water bowl.</p>",
-                "supplier_cost": 2.00,
-                "recommended_price": 5.99,
-                "images": ["https://via.placeholder.com/600x600.png?text=Water+Bowl"],
-                "shipping_time_days": 8,
-                "rating": 3.2 # Should be filtered out!
-            }
-        ]
+        if 'response' in locals() and hasattr(response, 'text'):
+            print(f"    Response body: {response.text}")
+        return []
 
 def filter_products(products):
     """Applies strict B.L.A.S.T. rules to products."""
