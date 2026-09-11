@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-ZENDROP_API_KEY = os.getenv("SUPPLIER_API_KEY")
-ZENDROP_API_URL = os.getenv("SUPPLIER_API_URL")
+ZENDROP_API_KEY = os.getenv("SUPPLIER_API_KEY") or os.getenv("ZENDROP_API_KEY")
+ZENDROP_API_URL = os.getenv("SUPPLIER_API_URL") or "https://api.zendrop.com/v1"
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME")
