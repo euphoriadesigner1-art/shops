@@ -60,9 +60,11 @@ def publish_to_shopify(record):
         }
     }
     
-    image_url = fields.get("images", "")
-    if image_url:
-        product_payload["product"]["images"] = [{"src": image_url}]
+    images_str = fields.get("images", "")
+    if images_str:
+        # Split by comma and create the images payload list
+        image_urls = [url.strip() for url in images_str.split(",") if url.strip()]
+        product_payload["product"]["images"] = [{"src": url} for url in image_urls]
         
     url = f"{SHOPIFY_STORE_URL}/admin/api/2024-01/products.json"
     headers = {

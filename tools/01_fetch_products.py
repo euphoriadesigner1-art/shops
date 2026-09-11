@@ -106,7 +106,9 @@ def push_to_airtable(products):
     # Airtable allows batch creation of up to 10 records at a time
     records = []
     for p in products:
-        image_url = p.get("images", [""])[0] if isinstance(p.get("images"), list) else p.get("images", "")
+        # Join multiple image URLs with a comma
+        images_list = p.get("images", [])
+        images_str = ",".join(images_list) if isinstance(images_list, list) else str(images_list)
         
         records.append({
             "fields": {
@@ -115,7 +117,7 @@ def push_to_airtable(products):
                 "description_html": str(p["description_html"]),
                 "supplier_cost": float(p["supplier_cost"]),
                 "recommended_price": float(p["recommended_price"]),
-                "images": str(image_url),
+                "images": images_str,
                 "shipping_time_days": int(p["shipping_time_days"]),
                 "rating": float(p["rating"]),
                 "Approved": False,
